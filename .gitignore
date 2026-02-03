@@ -1,0 +1,8 @@
+tracking_implementations/AVTrack/data/
+tracking_implementations/AVTrack/output/checkpoints/train/avtrack/deit_tiny_distilled_patch16_224/
+tracking_implementations/AVTrack/teacher_model/
+tyf/
+videos/
+yolo_engine/
+tracking_implementations/AVTrack/pretrained_models/
+pipeline/models/

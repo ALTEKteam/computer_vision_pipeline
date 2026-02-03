@@ -18,7 +18,7 @@ cfg = EasyDict({
     },
     'TEST': {'EPOCH': 300, 'SEARCH_FACTOR': 4.0, 'SEARCH_SIZE': 256, 'TEMPLATE_FACTOR': 2.0, 'TEMPLATE_SIZE': 128}
 })
-
+# CHANGE HERE
 params = EasyDict({'cfg': cfg, 'search_size': 256, 'template_size': 128,
     'checkpoint': '/home/furkan/Desktop/CENG/altek/pipeline/models/AVTrack_model.pth',
     'debug':False,

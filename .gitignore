@@ -5,4 +5,5 @@ tyf/
 videos/
 yolo_engine/
 tracking_implementations/AVTrack/pretrained_models/
-pipeline/models/
+pipeline/models/AVTrack_model.pth
+pipeline/models/best_new.onnx

@@ -19,10 +19,24 @@ After the installation steps your workspace should be like this
 
 Therefore after the installation of required dependencies for tracker, other files should be downloaded.
 
-To install the necessary dependencies, run the following command:
+To install required dependencies, it is highly recommended that downloading conda environment and create a new environment for installation:
 
 ```bash
-pip install -r requirements.txt
+conda create -n avtrack_env python=3.8 -y
+
+conda activate avtrack_env
+```
+
+After activating the environment, this command can be executed for first part of installation of dependencies
+
+```bash
+pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
+```
+
+After that, To install the others, run the following command:
+
+```bash
+pip install -r tracking_implementations/AVTrack/requirements.txt
 ```
 AVTrack model file is downloaded by [Google Drive Link](https://drive.google.com/drive/folders/1Dr4IulKQf_VgKyG4LelhFw9KRKR1Jl0Z)
 

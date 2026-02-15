@@ -1,6 +1,6 @@
-tracking_implementations/AVTrack/data/
 tracking_implementations/AVTrack/output/checkpoints/train/avtrack/deit_tiny_distilled_patch16_224/
 tracking_implementations/AVTrack/teacher_model/
+tracking_implementations/ORTrack/teacher_model/
 tyf/
 pipeline/videos/Talon_video.mp4
 yolo_engine/

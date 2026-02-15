@@ -5,5 +5,8 @@ tyf/
 pipeline/videos/Talon_video.mp4
 yolo_engine/
 tracking_implementations/AVTrack/pretrained_models/
+tracking_implementations/ORTrack/pretrained_models/
 pipeline/models/AVTrack_model.pth
+pipeline/models/ORTrack_model.pth
+pipeline/models/vitTracker.onnx
 pipeline/models/best_new.onnx

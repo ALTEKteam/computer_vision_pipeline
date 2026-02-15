@@ -1,14 +1,18 @@
 import sys
 import cv2 as cv
 import numpy as np
-import params.tracker.av_track_params as avtrack_params
-sys.path.append(r'/home/furkan/Desktop/CENG/altek/tracking_implementations/AVTrack')
-from lib.test.tracker.avtrack import AVTrack
-
+# import params.tracker.av_track_params as avtrack_params
+import params.tracker.or_track_params as ortrack_params
+# sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/AVTrack')
+sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/ORTrack')
+# from lib.test.tracker.avtrack import AVTrack
+from lib.test.tracker.ortrack import ORTrack
+from .builtin.vittracker import VitTracker
+from params.tracker_types import TRACKERS
 
 class TrackerAdapter:
 
-    def __init__(self, model_path=None):
+    def __init__(self, model_path=None, tracker_model = TRACKERS.ORTrack):
         """
         Tracker modelini yükler ve hazırlar.
         """
@@ -16,9 +20,16 @@ class TrackerAdapter:
         # Eğer parametre (cfg) istiyorsa buraya eklemelisin.
         
         # self.tracker = AVTracker(params=...) 
-        self.tracker = AVTrack(avtrack_params.params, dataset_name=avtrack_params.dataset_name) 
-        
+        if (tracker_model == TRACKERS.AVTrack):
+            pass
+            # self.tracker = AVTrack(avtrack_params.params, dataset_name=avtrack_params.dataset_name) 
+        elif (tracker_model == TRACKERS.ORTrack):
+            self.tracker = ORTrack(ortrack_params.params, dataset_name=ortrack_params.dataset_name)
+        else:
+            print(f"Yeni tracker'a geçildi: {tracker_model}")
+            self.tracker = VitTracker()  # VitTracker sınıfını kullan        
         self.is_initialized = False
+        self.tracker_model = tracker_model
         print("Tracker Modülü Hazır (Model yüklendi)")
 
     def initialize(self, frame, bbox):
@@ -35,9 +46,11 @@ class TrackerAdapter:
         
         # Bbox'ı int yapalım ne olur ne olmaz
         bbox = [int(x) for x in bbox]
-        
-        # AVTrack init çağrısı (Senin koduna özel):
-        self.tracker.initialize(frame, {'init_bbox': bbox})
+        if (self.tracker_model != TRACKERS.VitTracker):
+            # AVTrack init çağrısı (Senin koduna özel):
+            self.tracker.initialize(frame, {'init_bbox': bbox})
+        else:
+            self.tracker.initialize(frame, bbox)
         
         self.is_initialized = True
         # print(f"Tracker başlatıldı. Hedef: {bbox}")
@@ -55,7 +68,9 @@ class TrackerAdapter:
         
         # --- ÇIKTIYI TERCÜME ETME (Senin AVTrack yapına göre) ---
         # Genelde 'target_bbox' ve 'best_score' döner demiştik.
-        
+        if (outputs is None):
+            return False, None
+        print(outputs)
         if 'target_bbox' in outputs:
             bbox = outputs['target_bbox']
             score = outputs.get('best_score', 1.0) # Skor yoksa 1.0 varsay

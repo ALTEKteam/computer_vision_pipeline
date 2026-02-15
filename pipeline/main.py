@@ -10,12 +10,13 @@ import time
 from modules.yolo_engine import YoloDetector
 from modules.tracker_adapter import TrackerAdapter
 from core.pipeline import DronePipeline
+from params.tracker_types import TRACKERS
 
 def main():
     # --- 1. AYARLAR ---
     # Model ve Video yolları (Senin bilgisayarındaki yollara göre düzenle)
-    MODEL_PATH = r"/home/furkan/Desktop/CENG/altek/pipeline/models/best_new_fp16.onnx"
-    VIDEO_PATH = r"/home/furkan/Desktop/CENG/altek/pipeline/videos/Talon_video.mp4"
+    MODEL_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/models/best_new_fp16.onnx"
+    VIDEO_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/videos/Talon_video.mp4"
 
     if not os.path.exists(MODEL_PATH):
         print(f"HATA: Model dosyası bulunamadı -> {MODEL_PATH}")
@@ -31,7 +32,7 @@ def main():
     yolo_engine = YoloDetector(model_path=MODEL_PATH, conf_thres=0.5)
     
     print("2. AVTrack Takipçisi Hazırlanıyor...")
-    tracker_engine = TrackerAdapter()
+    tracker_engine = TrackerAdapter(tracker_model=TRACKERS.ORTrack)  # VitTracker kullanılıyor
     
     print("3. Pipeline (Beyin) Kuruluyor...")
     pipeline = DronePipeline(yolo_engine, tracker_engine)

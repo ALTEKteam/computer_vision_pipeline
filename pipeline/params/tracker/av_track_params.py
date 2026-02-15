@@ -20,7 +20,7 @@ cfg = EasyDict({
 })
 # CHANGE HERE
 params = EasyDict({'cfg': cfg, 'search_size': 256, 'template_size': 128,
-    'checkpoint': '/home/furkan/Desktop/CENG/altek/pipeline/models/AVTrack_model.pth',
+    'checkpoint': '/home/furkan/Desktop/CS/altek/pipeline/models/AVTrack_model.pth',
     'debug':False,
     'use_visdom':False,
     'save_all_boxes':False,

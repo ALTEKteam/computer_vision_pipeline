@@ -31,8 +31,8 @@ def main():
     print("1. YOLO Dedektörü Yükleniyor...")
     yolo_engine = YoloDetector(model_path=MODEL_PATH, conf_thres=0.5)
     
-    print("2. AVTrack Takipçisi Hazırlanıyor...")
-    tracker_engine = TrackerAdapter(tracker_model=TRACKERS.ORTrack)  # VitTracker kullanılıyor
+    print("2. MixFormerV2 Takipçisi Hazırlanıyor...")
+    tracker_engine = TrackerAdapter(tracker_model=TRACKERS.MixFormerV2)  # MixFormerV2 kullanılıyor
     
     print("3. Pipeline (Beyin) Kuruluyor...")
     pipeline = DronePipeline(yolo_engine, tracker_engine)

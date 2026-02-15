@@ -6,7 +6,10 @@ pipeline/videos/Talon_video.mp4
 yolo_engine/
 tracking_implementations/AVTrack/pretrained_models/
 tracking_implementations/ORTrack/pretrained_models/
+tracking_implementations/MixFormerV2/pretrained_models/
+tracking_implementations/MixFormerV2/test/lib/
 pipeline/models/AVTrack_model.pth
 pipeline/models/ORTrack_model.pth
 pipeline/models/vitTracker.onnx
 pipeline/models/best_new.onnx
+pipeline/models/mixformerv2_small.pth

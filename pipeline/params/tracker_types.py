@@ -6,3 +6,4 @@ class TRACKERS(Enum):
     AVTrack = "avtrack",
     VitTracker = "vittrack",
     ORTrack = "ortrack",
+    MixFormerV2 = "mixformer_v2",

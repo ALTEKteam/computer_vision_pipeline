@@ -1,13 +1,20 @@
 import sys
 import cv2 as cv
 import numpy as np
+
+# Change the dependency paths according to the current tracker you want to use.
 # import params.tracker.av_track_params as avtrack_params
-import params.tracker.or_track_params as ortrack_params
+# import params.tracker.or_track_params as ortrack_params
+import params.tracker.mixformer_params as mixformer_params
+
 # sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/AVTrack')
-sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/ORTrack')
+# sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/ORTrack')
+sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/MixFormerV2')
+
 # from lib.test.tracker.avtrack import AVTrack
-from lib.test.tracker.ortrack import ORTrack
-from .builtin.vittracker import VitTracker
+# from lib.test.tracker.ortrack import ORTrack
+# from .builtin.vittracker import VitTracker
+from lib.test.tracker.mixformer2_vit import MixFormer   
 from params.tracker_types import TRACKERS
 
 class TrackerAdapter:
@@ -24,7 +31,10 @@ class TrackerAdapter:
             pass
             # self.tracker = AVTrack(avtrack_params.params, dataset_name=avtrack_params.dataset_name) 
         elif (tracker_model == TRACKERS.ORTrack):
-            self.tracker = ORTrack(ortrack_params.params, dataset_name=ortrack_params.dataset_name)
+            pass
+            # self.tracker = ORTrack(ortrack_params.params, dataset_name=ortrack_params.dataset_name)
+        elif (tracker_model == TRACKERS.MixFormerV2):
+            self.tracker = MixFormer(mixformer_params.params,dataset_name="MixFormer-Live")
         else:
             print(f"Yeni tracker'a geçildi: {tracker_model}")
             self.tracker = VitTracker()  # VitTracker sınıfını kullan        

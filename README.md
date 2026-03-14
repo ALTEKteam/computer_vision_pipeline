@@ -1,12 +1,12 @@
 # Computer Vision Tracking Pipeline
 
-This repository contains a modular computer vision pipeline for object detection and target tracking.
+This repository contains a modular and comprehensive computer vision pipeline of ALTEK UAV team for object detection and target tracking aiming to perform missions in TEKNOFEST Combat UAV Contest.
 The main runtime flow lives under `pipeline/`, while tracker-specific research implementations live under `tracking_implementations/`.
 
 ## Project Structure
 
 - `pipeline/`
-    - Main application and runtime logic
+    - Main applications and runtime logic
     - `main.py`: entry point for running the pipeline
     - `main/pipeline.py`: state machine (`SEARCHING` / `TRACKING`) and tracking flow
     - `modules/`: detector and tracker adapters
@@ -24,14 +24,14 @@ The main runtime flow lives under `pipeline/`, while tracker-specific research i
 
 ## Environment Setup
 
-Using a dedicated conda environment is recommended.
+Using a specific conda environment is recommended.
 
 ```bash
 conda create -n avtrack_env python=3.8 -y
 conda activate avtrack_env
 ```
 
-Install PyTorch (CUDA 11.7 example):
+Install PyTorch (CUDA 11.7 example as recommended version):
 
 ```bash
 pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
@@ -47,7 +47,7 @@ If you plan to run ORTrack or MixFormerV2, also install dependencies from their 
 
 ## Required Assets
 
-- Download AVTrack model weights from the shared drive used by the project team.
+- Download AVTrack model weights from the shared drive used by the project team or using its documentaton.
 - Place required tracker models in `pipeline/models/` (or the model path expected by your selected tracker config).
 - Place test videos under `pipeline/videos/`.
 
@@ -58,7 +58,7 @@ If you plan to run ORTrack or MixFormerV2, also install dependencies from their 
 Before running, verify model and video paths in:
 
 - `pipeline/main.py`
-- `pipeline/params/tracker/av_track_params.py`
+- `pipeline/params/tracker/av_track_params.py` (considering current tracker is AVTrack)
 
 Then run:
 
@@ -92,7 +92,7 @@ cd tracking_implementations/MixFormerV2
 python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data --save_dir .
 ```
 
-## Export and Engine Utilities (AVTrack)
+## Export and Engine Utilities (AVTrack, others will be coming soon)
 
 - ONNX exporter: `tracking_implementations/AVTrack/avtrack_onnx_exporter.py`
 - TensorRT engine builder: `tracking_implementations/AVTrack/engine_builder.py`

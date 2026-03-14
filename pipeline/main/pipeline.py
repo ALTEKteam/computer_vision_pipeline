@@ -77,7 +77,7 @@ class DronePipeline:
                     self._draw_status(output, self.bbox, (0, 0, 255), "DETECTED")
             # Draw other detections as non-selected
             for det in detections:
-                if det['bbox'] != (selected_bbox if selected_bbox is not None else None):
+                if selected_bbox is None or det['bbox'] != selected_bbox:
                     bx, by, bw, bh = [int(v) for v in det['bbox']]
                     cv.rectangle(output, (bx, by), (bx + bw, by + bh), COLOR_SEARCH, 1)
         else:

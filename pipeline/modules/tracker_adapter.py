@@ -1,6 +1,8 @@
 import sys
 import cv2 as cv
 import numpy as np
+from config import AVTRACK_ENGINE_PATH,AVTRACK_ROOT
+
 
 # =============================================================================
 # Load of Preferred Tracker (AVTrack, ORTrack, MixFormerV2, VitTracker vb.)
@@ -10,17 +12,17 @@ import numpy as np
 
 #AVTrack
 import params.tracker.av_track_params as avtrack_params
-sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/AVTrack')
-from pipeline.modules.custom.avtrack_adapter import AVTrackTracker
+sys.path.append(AVTRACK_ROOT)
+from modules.custom.avtrack_adapter import AVTrackTracker
 
 #ORTrack
 # import params.tracker.or_track_params as ortrack_params
-# sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/ORTrack')
+# sys.path.append(ORTRACK_ROOT)
 # from lib.test.tracker.ortrack import ORTrack
 
 #MixFormerV2
 # import params.tracker.mixformer_params as mixformer_params
-# sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/MixFormerV2')
+# sys.path.append(MIXFORMER_ROOT)
 # from lib.test.tracker.mixformer2_vit import MixFormer  
 
 #VitTracker
@@ -40,7 +42,7 @@ class TrackerAdapter:
             self.tracker = AVTrackTracker(
                 config_name='deit_tiny_patch16_224',
                 # onnx_path='/home/furkan/Desktop/CS/altek/pipeline/models/avtrack.onnx',  # ORT modu
-                engine_path='/home/furkan/Desktop/CS/altek/pipeline/models/avtrack_3060_fp16.engine',  # ORT modu
+                engine_path=AVTRACK_ENGINE_PATH,  # ORT modu
                 device='cuda'
             )
             # pass

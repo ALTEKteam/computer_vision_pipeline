@@ -1,10 +1,11 @@
 import cv2 as cv
+from config import VITTRACKER_ONNX_PATH
 
 class VitTracker:
     def __init__(self):
         # Initialization of the VIT Tracker
         try:
-            net = "/home/furkan/Desktop/CS/altek/pipeline/models/vitTracker.onnx"  # VIT model yolu
+            net = VITTRACKER_ONNX_PATH  # VIT model yolu
             model = cv.dnn.readNet(net)
             self.tracker = cv.TrackerVit_create(model,tracking_score_threshold=0.5)
             print(">> VIT Tracker has been initialized successfully.")

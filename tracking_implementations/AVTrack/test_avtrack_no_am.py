@@ -1,17 +1,17 @@
 """
-AVTrack - AM'siz PC Test Script
-================================
-Bu script AVTrack modelini Activation Module OLMADAN calistirir.
-Amac: AM kaldirildiginda tracking performansinin korunup korunmadigini
-PC uzerinde dogrulamak.
+AVTrack - No-AM PC Test Script
+==============================
+This script runs the AVTrack model WITHOUT the Activation Module.
+Goal: verify on PC whether tracking performance is preserved
+when AM is removed.
 
-Kullanim:
+Usage:
     cd <AVTrack_ROOT>
     python test_avtrack_no_am.py \
         --checkpoint model.pth \
         --video test_video.mp4
 
-    # Orijinal (AM'li) ile yan yana karsilastirma:
+    # Side-by-side comparison with the original (with AM):
     python test_avtrack_no_am.py \
         --checkpoint model.pth \
         --video test_video.mp4 \
@@ -35,30 +35,30 @@ sys.path.append(os.getcwd())
 
 
 # =============================================================================
-# 1) Config yukleme (EasyDict tabanli)
+# 1) Config loading (EasyDict-based)
 # =============================================================================
 
 def load_config(config_name='deit_tiny_patch16_224'):
-    """AVTrack config'ini yukle. EasyDict + update_config_from_file kullanir."""
+    """Load AVTrack config. Uses EasyDict + update_config_from_file."""
     from lib.config.avtrack.config import cfg, update_config_from_file
 
     yaml_path = os.path.join(os.getcwd(), 'experiments', 'avtrack', f'{config_name}.yaml')
     if os.path.exists(yaml_path):
         update_config_from_file(yaml_path)
-        print(f"[OK] Config yuklendi: {yaml_path}")
+        print(f"[OK] Config loaded: {yaml_path}")
     else:
-        print(f"[UYARI] YAML bulunamadi: {yaml_path}")
-        print(f"        Default config kullaniliyor")
+        print(f"[WARNING] YAML not found: {yaml_path}")
+        print(f"          Using default config")
 
     return cfg
 
 
 # =============================================================================
-# 2) Model yukleme
+# 2) Model loading
 # =============================================================================
 
 def load_model(checkpoint_path, cfg):
-    """AVTrack modelini yukle."""
+    """Load AVTrack model."""
     from lib.models.avtrack import build_avtrack
     model = build_avtrack(cfg, training=False)
 
@@ -75,26 +75,26 @@ def load_model(checkpoint_path, cfg):
 
     missing, unexpected = model.load_state_dict(clean_sd, strict=False)
     if missing:
-        print(f"[UYARI] Eksik anahtar: {len(missing)}")
+        print(f"[WARNING] Missing keys: {len(missing)}")
         for k in missing[:5]:
             print(f"         - {k}")
     if unexpected:
-        print(f"[UYARI] Beklenmeyen anahtar: {len(unexpected)}")
+        print(f"[WARNING] Unexpected keys: {len(unexpected)}")
         for k in unexpected[:5]:
             print(f"         - {k}")
 
-    print(f"[OK] Checkpoint yuklendi: {checkpoint_path}")
+    print(f"[OK] Checkpoint loaded: {checkpoint_path}")
     return model
 
 
 # =============================================================================
-# 3) AM'yi devre disi birakma (monkey-patch)
+# 3) Disable AM (monkey-patch)
 # =============================================================================
 
 def forward_features_no_am(self, z, x, is_distill=False):
     """
-    forward_features'in AM'siz versiyonu.
-    active_score_module CAGRILMIYOR, tum bloklar her zaman calisiyor.
+    No-AM version of forward_features.
+    active_score_module is NOT called, all blocks always run.
     """
     from lib.models.avtrack.utils import combine_tokens, recover_tokens
 
@@ -125,11 +125,11 @@ def forward_backbone_no_am(self, z, x, tnc_keep_rate=None,
 
 
 def patch_model_no_am(model):
-    """Backbone forward_features'ini AM'siz versiyonla degistirir."""
+    """Replace backbone forward_features with the no-AM version."""
     backbone = model.backbone
     backbone.forward_features = types.MethodType(forward_features_no_am, backbone)
     backbone.forward = types.MethodType(forward_backbone_no_am, backbone)
-    print("[OK] AM devre disi birakildi (monkey-patch)")
+    print("[OK] AM disabled (monkey-patch)")
 
 
 # =============================================================================
@@ -137,7 +137,7 @@ def patch_model_no_am(model):
 # =============================================================================
 
 def inference_forward(model, template, search):
-    """Training-only parametreleri atlayarak temiz inference yapar."""
+    """Run clean inference by skipping training-only parameters."""
     model.eval()
     with torch.no_grad():
         x, aux_dict = model.backbone(z=template, x=search)
@@ -180,7 +180,7 @@ def preprocess(image, size):
 
 
 def crop_region(frame, cx, cy, wh_area, output_size, factor):
-    """Merkez + alan bazli crop. Ortalama renk ile padding."""
+    """Center + area based crop. Pads with average color."""
     crop_sz = int(np.ceil(np.sqrt(wh_area) * factor))
     crop_sz = max(crop_sz, 1)
 
@@ -206,7 +206,7 @@ def crop_region(frame, cx, cy, wh_area, output_size, factor):
 def decode_bbox(out, cx, cy, crop_sz, resize_factor, search_size):
     """
     pred_boxes: [cx, cy, w, h] normalized (0-1).
-    Bunlari orijinal frame koordinatlarina cevirir.
+    Converts them to original frame coordinates.
     """
     pred = out['pred_boxes'].cpu().numpy()[0, 0]  # [4]
     score_map = out['score_map'].cpu().numpy()[0, 0]
@@ -226,7 +226,7 @@ def decode_bbox(out, cx, cy, crop_sz, resize_factor, search_size):
 
 
 # =============================================================================
-# 6) Tracking dongusu
+# 6) Tracking loop
 # =============================================================================
 
 def run_tracking(model, video_source, device, cfg, label="", score_thr=0.15):
@@ -240,7 +240,7 @@ def run_tracking(model, video_source, device, cfg, label="", score_thr=0.15):
 
     cap = cv2.VideoCapture(video_source)
     if not cap.isOpened():
-        print(f"[HATA] Video acilamadi: {video_source}")
+        print(f"[ERROR] Could not open video: {video_source}")
         return None
 
     ret, frame = cap.read()
@@ -249,7 +249,7 @@ def run_tracking(model, video_source, device, cfg, label="", score_thr=0.15):
         return None
 
     win_name = f"AVTrack {label}" if label else "AVTrack Test"
-    print(f"\n[{label or 'INFO'}] Hedef objeyi secin ve ENTER basin...")
+    print(f"\n[{label or 'INFO'}] Select the target object and press ENTER...")
     bbox_sel = cv2.selectROI(win_name, frame, fromCenter=False)
     cv2.destroyWindow(win_name)
 
@@ -303,7 +303,7 @@ def run_tracking(model, video_source, device, cfg, label="", score_thr=0.15):
             cv2.putText(display, f"{score:.2f}", (x1, y1 - 8),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         else:
-            cv2.putText(display, "KAYIP", (50, 50),
+            cv2.putText(display, "LOST", (50, 50),
                        cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
 
         info = f"{label} FPS:{fps:.0f}" if label else f"FPS:{fps:.0f}"
@@ -324,13 +324,13 @@ def run_tracking(model, video_source, device, cfg, label="", score_thr=0.15):
 # =============================================================================
 
 def main():
-    parser = argparse.ArgumentParser(description='AVTrack AM-siz PC Testi')
+    parser = argparse.ArgumentParser(description='AVTrack No-AM PC Test')
     parser.add_argument('--checkpoint', type=str, required=True)
     parser.add_argument('--config', type=str, default='deit_tiny_patch16_224')
     parser.add_argument('--video', type=str, default='0')
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--compare', action='store_true',
-                        help='Orijinal (AM\'li) ile karsilastir')
+                        help='Compare with the original (with AM)')
     args = parser.parse_args()
 
     video_src = int(args.video) if args.video.isdigit() else args.video
@@ -345,17 +345,17 @@ def main():
         patch_model_no_am(model_noam)
 
         print("\n" + "=" * 50)
-        print("  KARSILASTIRMA MODU")
-        print("  1) Orijinal (AM'li)")
-        print("  2) AM'siz")
-        print("  Ayni hedefi secin!")
+        print("  COMPARISON MODE")
+        print("  1) Original (with AM)")
+        print("  2) No-AM")
+        print("  Select the same target!")
         print("=" * 50)
 
-        print("\n--- ORIJINAL ---")
-        res_orig = run_tracking(model, video_src, device, cfg, label="ORIJINAL")
+        print("\n--- ORIGINAL ---")
+        res_orig = run_tracking(model, video_src, device, cfg, label="ORIGINAL")
 
-        print("\n--- AM'SIZ ---")
-        res_noam = run_tracking(model_noam, video_src, device, cfg, label="AM-SIZ")
+        print("\n--- NO-AM ---")
+        res_noam = run_tracking(model_noam, video_src, device, cfg, label="NO-AM")
 
         if res_orig and res_noam:
             fps_o = np.mean([r[5] for r in res_orig])
@@ -364,22 +364,22 @@ def main():
             sc_n = np.mean([r[4] for r in res_noam if r[4] > 0]) if any(r[4] > 0 for r in res_noam) else 0
 
             print("\n" + "=" * 50)
-            print(f"  {'':20s} {'ORIJINAL':>12s} {'AM-SIZ':>12s}")
-            print(f"  {'Ort. FPS':20s} {fps_o:>12.1f} {fps_n:>12.1f}")
-            print(f"  {'Ort. Score':20s} {sc_o:>12.3f} {sc_n:>12.3f}")
+            print(f"  {'':20s} {'ORIGINAL':>12s} {'NO-AM':>12s}")
+            print(f"  {'Avg. FPS':20s} {fps_o:>12.1f} {fps_n:>12.1f}")
+            print(f"  {'Avg. Score':20s} {sc_o:>12.3f} {sc_n:>12.3f}")
             print(f"  {'Frame':20s} {len(res_orig):>12d} {len(res_noam):>12d}")
             print("=" * 50)
     else:
         patch_model_no_am(model)
-        results = run_tracking(model, video_src, device, cfg, label="AM-SIZ")
+        results = run_tracking(model, video_src, device, cfg, label="NO-AM")
 
         if results:
             fps_list = [r[5] for r in results]
             scores = [r[4] for r in results if r[4] > 0]
-            print(f"\n[SONUC] Ort. FPS: {np.mean(fps_list):.1f}")
+            print(f"\n[RESULT] Avg. FPS: {np.mean(fps_list):.1f}")
             if scores:
-                print(f"[SONUC] Ort. Score: {np.mean(scores):.3f}")
-            print(f"[SONUC] Frame: {len(results)}")
+                print(f"[RESULT] Avg. Score: {np.mean(scores):.3f}")
+            print(f"[RESULT] Frame: {len(results)}")
 
 
 if __name__ == '__main__':

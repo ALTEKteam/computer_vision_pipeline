@@ -8,10 +8,11 @@ from time import time
 import types
 import numpy as np
 import cv2 as cv
+from config import AVTRACK_ENGINE_PATH, AVTRACK_ROOT
 import torch
 import onnxruntime as ort
 
-sys.path.append(r'/home/furkan/Desktop/CS/altek/tracking_implementations/AVTrack')
+sys.path.append(AVTRACK_ROOT)
 # =============================================================================
 # Load of AVTrack model and configuration
 # =============================================================================
@@ -142,7 +143,6 @@ class AVTrackTracker:
                     self.trt_inputs[name] = tensor
                 else:
                     self.trt_outputs[name] = tensor
-
             from lib.config.avtrack.config import cfg, update_config_from_file
             for base in sys.path:
                 yp = os.path.join(base, 'experiments', 'avtrack', f'{config_name}.yaml')

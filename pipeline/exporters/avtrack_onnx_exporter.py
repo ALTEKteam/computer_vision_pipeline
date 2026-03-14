@@ -10,8 +10,8 @@ Usage:
         --checkpoint model.pth \
         --output avtrack.onnx
     python avtrack_onnx_exporter.py \ 
-        --checkpoint /home/Desktop/CS/altek/pipeline/models/AVTrack_model.pth \ 
-        --output /home/Desktop/CS/altek/tracking_implementations/AVTrack/onnx/avtrack.onnx
+        --checkpoint ~/pipeline/models/AVTrack_model.pth \ 
+        --output ~/pipeline/models/avtrack.onnx
 
     Then test:
     python export_avtrack_onnx.py \

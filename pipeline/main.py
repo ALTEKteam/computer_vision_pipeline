@@ -10,12 +10,13 @@ from modules.yolo_engine import YoloDetector
 from modules.tracker_adapter import TrackerAdapter
 from main.pipeline import DronePipeline
 from params.tracker_types import TRACKERS
+from config import YOLO_MODEL_PATH, DEFAULT_VIDEO
 
 def main():
     # --- 1. Settings ---
     # Define the model and video paths in your computer.
-    MODEL_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/models/best_new_fp16.onnx"
-    VIDEO_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/videos/Talon_video.mp4"
+    MODEL_PATH = YOLO_MODEL_PATH
+    VIDEO_PATH = DEFAULT_VIDEO
     tracking_method = TRACKERS.AVTrack
 
     if not os.path.exists(MODEL_PATH):

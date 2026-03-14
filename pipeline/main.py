@@ -5,77 +5,69 @@ import cv2 as cv # type: ignore
 import sys
 import time
 
-# Modülleri import ediyoruz
-# Eğer __init__.py dosyalarını oluşturduysan bu şekilde temiz import yapabilirsin:
+# Import the modules
 from modules.yolo_engine import YoloDetector
 from modules.tracker_adapter import TrackerAdapter
-from core.pipeline import DronePipeline
+from main.pipeline import DronePipeline
 from params.tracker_types import TRACKERS
 
 def main():
-    # --- 1. AYARLAR ---
-    # Model ve Video yolları (Senin bilgisayarındaki yollara göre düzenle)
+    # --- 1. Settings ---
+    # Define the model and video paths in your computer.
     MODEL_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/models/best_new_fp16.onnx"
     VIDEO_PATH = r"/home/furkan/Desktop/CS/altek/pipeline/videos/Talon_video.mp4"
+    tracking_method = TRACKERS.AVTrack
 
     if not os.path.exists(MODEL_PATH):
-        print(f"HATA: Model dosyası bulunamadı -> {MODEL_PATH}")
+        print(f"ERROR: Model file does not exist. -> {MODEL_PATH}")
         return
     if not os.path.exists(VIDEO_PATH):
-        print(f"HATA: Video dosyası bulunamadı -> {VIDEO_PATH}")
+        print(f"ERROR: Video file does not exist. -> {VIDEO_PATH}")
         return
 
-    # --- 2. SİSTEMİ BAŞLATMA (INITIALIZATION) ---
-    print("Sistem Başlatılıyor...")
+    # --- 2. SYSTEM INITIALIZATION ---
+    print("System is initializing...")
     
-    print("1. YOLO Dedektörü Yükleniyor...")
+    print("1. YOLO detector is being prepared...")
     yolo_engine = YoloDetector(model_path=MODEL_PATH, conf_thres=0.5)
     
-    print("2. MixFormerV2 Takipçisi Hazırlanıyor...")
-    tracker_engine = TrackerAdapter(tracker_model=TRACKERS.MixFormerV2)  # MixFormerV2 kullanılıyor
+    print(f"2. {tracking_method} Tracker is being prepared...")
+    tracker_engine = TrackerAdapter(tracker_model=tracking_method)  # MixFormerV2 kullanılıyor
     
-    print("3. Pipeline (Beyin) Kuruluyor...")
+    print("3. Pipeline is initalizing...")
     pipeline = DronePipeline(yolo_engine, tracker_engine)
 
-    # --- 3. ANA DÖNGÜ (MAIN LOOP) ---
+    # --- 3. MAIN LOOP ---
     cap = cv.VideoCapture(VIDEO_PATH)
     
-    # Tam ekran pencere ayarı (Opsiyonel)
-    cv.namedWindow("TEKNOFEST 2026 - TARGET SYSTEM", cv.WINDOW_NORMAL)
     
-    print("Sistem Hazır! Başlatılıyor...")
-    
+    print("System is ready! Starting...")
     prev_time = 0
-    
     while True:
+        cv.namedWindow("TEKNOFEST 2026 - TARGET SYSTEM", cv.WINDOW_NORMAL)
         ret, frame = cap.read()
         if not ret: break
-            
-        # Pipeline işlemi
+        fh,fw = frame.shape[0], frame.shape[1]
         processed_frame = pipeline.run_step(frame)
-        
-        # --- 3. EKLEME: FPS Hesaplama ve Ekrana Yazma ---
+
         curr_time = time.time()
         time_diff = curr_time - prev_time
         
-        # Sıfıra bölünme hatasını önlemek için küçük kontrol
-        if time_diff > 0:
-            fps = 1 / time_diff
-        else:
-            fps = 0
+        # To prevent zero division error
+        if time_diff > 0: fps = 1 / time_diff
+        else: fps = 0
             
         prev_time = curr_time
-        
-        # FPS Metnini Oluştur
         fps_text = f"FPS: {int(fps)}"
         
-        # Ekrana Yaz (Sağ alt köşe, Camgöbeği rengi)
         cv.putText(processed_frame, fps_text, (1050, 680), 
                    cv.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
         # ------------------------------------------------
-        
-        cv.imshow("TEKNOFEST 2026 - TARGET SYSTEM", processed_frame)
-        
+        x1, y1 = int(fw * 0.25), int(fh * 0.1)
+        x2, y2 = int(fw * 0.75), int(fh * 0.9)
+        cv.rectangle(processed_frame, (x1, y1), (x2, y2), (255,255,0), 2)
+        cv.putText(processed_frame, "HEDEF VURUS ALANI (AV)",(x1 + 4, y1 + 16), cv.FONT_HERSHEY_SIMPLEX, 0.4, (0,0,0) , 1)
+        cv.imshow("TEKNOFEST 2026 - TARGET SYSTEM", processed_frame)        
         if cv.waitKey(1) & 0xFF == ord('q'):
             break
             

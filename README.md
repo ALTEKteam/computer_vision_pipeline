@@ -1,85 +1,116 @@
-## This is an auto generated readme file. It will be updated later 
+# Computer Vision Tracking Pipeline
 
+This repository contains a modular computer vision pipeline for object detection and target tracking.
+The main runtime flow lives under `pipeline/`, while tracker-specific research implementations live under `tracking_implementations/`.
 
-# Computer Vision Pipeline
+## Project Structure
 
-## Overview
-This repository contains a comprehensive implementation of a Computer Vision pipeline that addresses various tasks needed for processing images and video. The primary objectives of this pipeline include image preprocessing, feature extraction, and machine learning model integration for real-time or batch processing applications.
+- `pipeline/`
+    - Main application and runtime logic
+    - `main.py`: entry point for running the pipeline
+    - `main/pipeline.py`: state machine (`SEARCHING` / `TRACKING`) and tracking flow
+    - `modules/`: detector and tracker adapters
+    - `models/`: runtime model files used by the pipeline
+    - `params/`: tracker and runtime parameter files
+    - `videos/`: input videos
+- `tracking_implementations/`
+    - `AVTrack/`
+    - `ORTrack/`
+    - `MixFormerV2/`
+- `yolo_engine/`
+    - ONNX-related model conversion/inference utilities for YOLO
+- `files/`, `papers/`, `videos/`
+    - Supplementary assets and documents
 
-## Table of Contents
-- [Installation](#installation)
-- [Usage](#usage)
-- [Pipeline Components](#pipeline-components)
-- [Contributing](#contributing)
-- [License](#license)
+## Environment Setup
 
-## Installation
-After the installation steps your workspace should be like this
-![Image](files/pipeline_folder_arch.png)
-
-Therefore after the installation of required dependencies for tracker, other files should be downloaded.
-
-To install required dependencies, it is highly recommended that downloading conda environment and create a new environment for installation:
+Using a dedicated conda environment is recommended.
 
 ```bash
 conda create -n avtrack_env python=3.8 -y
-
 conda activate avtrack_env
 ```
 
-After activating the environment, this command can be executed for first part of installation of dependencies
+Install PyTorch (CUDA 11.7 example):
 
 ```bash
 pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu117
 ```
 
-After that, To install the others, run the following command:
+Install AVTrack dependencies:
 
 ```bash
 pip install -r tracking_implementations/AVTrack/requirements.txt
 ```
-AVTrack model file is downloaded by [Google Drive Link](https://drive.google.com/drive/folders/1Dr4IulKQf_VgKyG4LelhFw9KRKR1Jl0Z)
 
-After downloading extract it, and by changing its name add models folder seeing at above.
+If you plan to run ORTrack or MixFormerV2, also install dependencies from their own `requirements` files and README instructions.
 
-And to run the algorithm in a correct way, also the video should be downloaded from Altek Drive folder. After downlaoding, it should be added under the folder [videos](pipeline/videos)
+## Required Assets
 
-## Usage
-Before running change the paths of models which are defined in [main.py](pipeline/main.py) and [av_track_params.py](pipeline/params/tracker/av_track_params.py)
-To run the pipeline, execute the following command:
+- Download AVTrack model weights from the shared drive used by the project team.
+- Place required tracker models in `pipeline/models/` (or the model path expected by your selected tracker config).
+- Place test videos under `pipeline/videos/`.
+
+> The repository may not include large model/video files by default.
+
+## Running the Pipeline
+
+Before running, verify model and video paths in:
+
+- `pipeline/main.py`
+- `pipeline/params/tracker/av_track_params.py`
+
+Then run:
 
 ```bash
+cd pipeline
 python main.py
 ```
 
-Make sure to provide the necessary input parameters such as input directory, output directory, and any configuration settings required for your specific application.
+## Tracker-Specific Notes
 
-## Pipeline Components
-1. **Image Preprocessing**: 
-    - Resize images
-    - Normalize pixel values
-    - Data augmentation techniques.
+For tracker implementations under `tracking_implementations/`, initialize local path configs when required.
 
-2. **Feature Extraction**:
-    - Utilize algorithms like SIFT, SURF, or deep learning models for extracting relevant features from images.
+### AVTrack
 
-3. **Model Training / Inference**:
-    - Train machine learning models using the extracted features.
-    - Perform real-time inference on incoming images or video streams.
-
-### Example Workflow
-```python
-from pipeline import Pipeline
-
-# Create a new pipeline instance
-pipeline = Pipeline(input_dir='path/to/images', output_dir='path/to/results')
-
-# Start the processing
-pipeline.run()
+```bash
+cd tracking_implementations/AVTrack
+python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data --save_dir ./output
 ```
 
-## Contributing
-Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+### ORTrack
+
+```bash
+cd tracking_implementations/ORTrack
+python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data --save_dir ./output
+```
+
+### MixFormerV2
+
+```bash
+cd tracking_implementations/MixFormerV2
+python tracking/create_default_local_file.py --workspace_dir . --data_dir ./data --save_dir .
+```
+
+## Export and Engine Utilities (AVTrack)
+
+- ONNX exporter: `tracking_implementations/AVTrack/avtrack_onnx_exporter.py`
+- TensorRT engine builder: `tracking_implementations/AVTrack/engine_builder.py`
+
+Example engine build:
+
+```bash
+cd tracking_implementations/AVTrack
+python engine_builder.py --onnx output/onnx/avtrack.onnx --engine output/avtrack_fp16.engine --fp16 --workspace-gb 1.0
+```
+
+## Troubleshooting
+
+- If path-related errors appear (`local.py`, `prj_dir`, dataset root), regenerate local config files using the commands above.
+- If imports such as `torch`, `onnxruntime`, or `tensorrt` are unresolved, verify the active environment and package installation.
+- If model files are missing, confirm paths and filenames in both pipeline config and tracker config files.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+This repository contains multiple subprojects that may use different licenses.
+Please check license files under each tracker directory (for example, `tracking_implementations/ORTrack/LICENSE`).

@@ -2,45 +2,46 @@ import cv2 as cv
 
 class VitTracker:
     def __init__(self):
-        # OpenCV'nin yerleşik VIT (Vision Transformer) Tracker'ını oluşturuyoruz.
-        # Not: Bunun çalışması için opencv-python sürümünün güncel olması (4.5+) önerilir.
+        # Initialization of the VIT Tracker
         try:
             net = "/home/furkan/Desktop/CS/altek/pipeline/models/vitTracker.onnx"  # VIT model yolu
             model = cv.dnn.readNet(net)
             self.tracker = cv.TrackerVit_create(model,tracking_score_threshold=0.5)
-            print(">> VIT Tracker başarıyla oluşturuldu.")
+            print(">> VIT Tracker has been initialized successfully.")
         except AttributeError:
-            print("HATA: OpenCV sürümünüzde VIT Tracker yok. 'pip install opencv-contrib-python' deneyin veya sürümü güncelleyin.")
+            print("ERROR: there is no vittrack implementation in the current OpenCV version. Please run 'pip install opencv-contrib-python' to install vittrack or update the version.")
             self.tracker = None
 
     def initialize(self, frame, bbox):
         """
-        Tracker'ı ilk hedefe kilitler.
-        bbox formatı: [x, y, w, h] (int veya float olabilir)
+        locks the tracker onto the initial bounding box in the first frame.
+        Input:
+            - frame: The initial video frame (numpy array).
+            - bbox format: [x, y, w, h] (int or float can be accepted, but will be converted to int)
+        output: None
         """
         if self.tracker is None: return
         
-        # OpenCV trackerları bazen float bbox sevmez, int'e çevirelim garanti olsun.
+        # convertion to int if necessary
         bbox = tuple(map(int, bbox))
         
-        # VIT Tracker tek seferlik bir nesne değildir, her initialize'da sıfırlamak gerekebilir
-        # Ancak OpenCV'de 'init' metodu genelde resetler. Yine de garanti olması için yeniden oluşturabiliriz.
-        # (Performans düşerse bu satırı kaldır, ama doğruluk artar)
+        # it can be necessary to re-create the tracker for each initialization,  not reset properly with init.
         if (not self.tracker):   self.tracker = cv.TrackerVit_create() 
         
         self.tracker.init(frame, bbox)
 
     def track(self, frame):
         """
-        Bir sonraki karedeki konumu tahmin eder.
-        Dönüş: [x, y, w, h] veya None (Eğer kaybettiyse)
+        Predicts the next position of the target in next frame
+        Input: frame (Numpy array)
+        Output: [x, y, w, h] or None (if lost)
         """
         if self.tracker is None: return None
 
         success, bbox = self.tracker.update(frame)
         print("Success:", success, "BBox:", bbox)
         if success:
-            # OpenCV tuple (x,y,w,h) döner, biz bunu listeye çevirip int yapalım
+            # OpenCV returns tuple. convert it to a list of ints
             return {"target_bbox": bbox, "best_score": self.tracker.getTrackingScore()}
         else:
             return None

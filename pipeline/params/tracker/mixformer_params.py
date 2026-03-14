@@ -1,3 +1,7 @@
+'''
+MixformerV2 Parameters
+'''
+
 from easydict import EasyDict
 
 mixformer_config = EasyDict({

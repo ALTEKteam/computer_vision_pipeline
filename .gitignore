@@ -1,9 +1,9 @@
+tyf/
+yolo_engine/
 tracking_implementations/AVTrack/output/checkpoints/train/avtrack/deit_tiny_distilled_patch16_224/
 tracking_implementations/AVTrack/teacher_model/
+tracking_implementations/AVTrack/output/
 tracking_implementations/ORTrack/teacher_model/
-tyf/
-pipeline/videos/Talon_video.mp4
-yolo_engine/
 tracking_implementations/AVTrack/pretrained_models/
 tracking_implementations/ORTrack/pretrained_models/
 tracking_implementations/MixFormerV2/pretrained_models/
@@ -13,3 +13,5 @@ pipeline/models/ORTrack_model.pth
 pipeline/models/vitTracker.onnx
 pipeline/models/best_new.onnx
 pipeline/models/mixformerv2_small.pth
+pipeline/videos/Talon_video.mp4
+pipeline/modules/_avtrack_adapter.py

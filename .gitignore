@@ -1,4 +1,5 @@
 tyf/
+__pycache__/
 yolo_engine/
 tracking_implementations/AVTrack/output/checkpoints/train/avtrack/deit_tiny_distilled_patch16_224/
 tracking_implementations/AVTrack/teacher_model/
@@ -15,3 +16,4 @@ pipeline/models/best_new.onnx
 pipeline/models/mixformerv2_small.pth
 pipeline/videos/Talon_video.mp4
 pipeline/modules/_avtrack_adapter.py
+.readme.md
